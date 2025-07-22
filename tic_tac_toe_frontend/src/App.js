@@ -110,8 +110,9 @@ function App() {
   }
 
   // --- Chat state and logic ---
-  // Enhance message to support emoji reactions (object: {text, reactions: {emoji: count}})
+  // Enhance message to support emoji reactions (object: {text, reactions: {emoji: count}, matchReactions: number})
   const EMOJIS = ["😀", "🎉", "👍", "😲", "❤️"];
+  const MATCH_REACTION_ICON = "🏆";
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
 
@@ -126,7 +127,11 @@ function App() {
     if (!trimmed) return;
     setMessages((prev) => [
       ...prev,
-      { text: trimmed, reactions: {} }
+      {
+        text: trimmed,
+        reactions: {},
+        matchReactions: 0 // initialize trophy count
+      }
     ]);
     setChatInput("");
   }
@@ -152,6 +157,21 @@ function App() {
     );
   }
 
+  /**
+   * Handles match reaction (trophy) for a specific message.
+   * Increments the count for the match reaction (local state).
+   */
+  // PUBLIC_INTERFACE
+  function handleMatchReaction(idx) {
+    setMessages(msgs =>
+      msgs.map((m, i) =>
+        i === idx
+          ? { ...m, matchReactions: (m.matchReactions ? m.matchReactions + 1 : 1) }
+          : m
+      )
+    );
+  }
+
   // Renders a row of emojis below each message, with their counters
   function renderReactions(msg, idx) {
     return (
@@ -161,8 +181,52 @@ function App() {
         marginTop: 2,
         fontSize: '1.18em',
         opacity: 0.92,
-        background: 'none'
+        background: 'none',
+        alignItems: "center"
       }}>
+        {/* Match Reaction Trophy Special Button */}
+        <button
+          type="button"
+          onClick={() => handleMatchReaction(idx)}
+          aria-label="Add match reaction"
+          className="ttt-match-reaction-btn"
+          style={{
+            border: '2px solid var(--ttt-accent)',
+            background: 'var(--ttt-cell-hover)',
+            color: '#E69F27',
+            cursor: 'pointer',
+            padding: '1.5px 9px',
+            borderRadius: '7px',
+            fontSize: '1.18em',
+            fontWeight: 700,
+            minWidth: 32,
+            marginRight: 2,
+            outline: 'none',
+            boxShadow: msg.matchReactions > 0 ? '0 2px 8px 0 #ffe5a1' : 'none',
+            transition: 'background 0.16s, box-shadow 0.13s, border-color 0.12s'
+          }}
+        >
+          <span style={{
+            filter: "drop-shadow(0 0 2px #fff7dc)",
+            textShadow: "1px 1px 0 #fffbe6"
+          }}>{MATCH_REACTION_ICON}</span>
+          {msg.matchReactions > 0 &&
+            <span style={{
+              marginLeft: 4,
+              color: "#E69F27",
+              fontWeight: 700,
+              fontSize: "0.98em",
+              background: "#fff8e4",
+              borderRadius: "8px",
+              padding: "1.5px 6px",
+              border: "1px solid #e1bc80",
+              marginRight: -4,
+              marginTop: -2,
+              verticalAlign: "middle"
+            }}>{msg.matchReactions}</span>
+          }
+        </button>
+        {/* Emoji reactions */}
         {EMOJIS.map(e => (
           <button
             key={e}
