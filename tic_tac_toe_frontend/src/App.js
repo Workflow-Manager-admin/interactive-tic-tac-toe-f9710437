@@ -109,6 +109,23 @@ function App() {
     );
   }
 
+  // --- Chat state and logic ---
+  const [messages, setMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+
+  // PUBLIC_INTERFACE
+  /**
+   * Handles sending a new chat message.
+   * Adds message to chat, clears the input.
+   */
+  function handleSendMessage(e) {
+    e.preventDefault();
+    const trimmed = chatInput.trim();
+    if (!trimmed) return;
+    setMessages((prev) => [...prev, trimmed]);
+    setChatInput("");
+  }
+
   return (
     <div className="ttt-app-bg">
       <div className="ttt-container">
@@ -136,6 +153,33 @@ function App() {
             O: Player 2
           </span>
         </div>
+        {/* --- Chat UI --- */}
+        <div className="ttt-chatbox">
+          <div className="ttt-chat-messages" aria-live="polite">
+            {messages.length === 0 ? (
+              <div className="ttt-chat-placeholder">Start chatting...</div>
+            ) : (
+              messages.map((msg, idx) => (
+                <div className="ttt-chat-message" key={idx}>
+                  {msg}
+                </div>
+              ))
+            )}
+          </div>
+          <form className="ttt-chat-form" onSubmit={handleSendMessage} autoComplete="off">
+            <input
+              className="ttt-chat-input"
+              type="text"
+              value={chatInput}
+              maxLength={200}
+              placeholder="Type a message…"
+              onChange={e => setChatInput(e.target.value)}
+              aria-label="Chat message"
+            />
+            <button className="ttt-chat-send-btn" type="submit" disabled={!chatInput.trim()}>Send</button>
+          </form>
+        </div>
+        {/* --- End Chat UI --- */}
       </div>
       <footer className="ttt-footer">
         <span>
