@@ -110,6 +110,8 @@ function App() {
   }
 
   // --- Chat state and logic ---
+  // Enhance message to support emoji reactions (object: {text, reactions: {emoji: count}})
+  const EMOJIS = ["😀", "🎉", "👍", "😲", "❤️"];
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
 
@@ -122,8 +124,80 @@ function App() {
     e.preventDefault();
     const trimmed = chatInput.trim();
     if (!trimmed) return;
-    setMessages((prev) => [...prev, trimmed]);
+    setMessages((prev) => [
+      ...prev,
+      { text: trimmed, reactions: {} }
+    ]);
     setChatInput("");
+  }
+
+  /**
+   * Handles emoji reaction for a specific chat message.
+   * Increments the count for the emoji on the selected message (local state only).
+   */
+  // PUBLIC_INTERFACE
+  function handleReact(idx, emoji) {
+    setMessages(msgs =>
+      msgs.map((m, i) =>
+        i === idx
+          ? {
+              ...m,
+              reactions: {
+                ...m.reactions,
+                [emoji]: (m.reactions && m.reactions[emoji] ? m.reactions[emoji] : 0) + 1,
+              }
+            }
+          : m
+      )
+    );
+  }
+
+  // Renders a row of emojis below each message, with their counters
+  function renderReactions(msg, idx) {
+    return (
+      <div style={{
+        display: 'flex',
+        gap: '0.5em',
+        marginTop: 2,
+        fontSize: '1.18em',
+        opacity: 0.92,
+        background: 'none'
+      }}>
+        {EMOJIS.map(e => (
+          <button
+            key={e}
+            type="button"
+            onClick={() => handleReact(idx, e)}
+            aria-label={`React ${e}`}
+            style={{
+              border: 'none',
+              background: 'none',
+              cursor: 'pointer',
+              padding: '1.5px 7px',
+              borderRadius: '6px',
+              fontSize: '1.1em',
+              minWidth: 28,
+              color: '#2D9CDB',
+              transition: 'background 0.13s, box-shadow 0.13s',
+              boxShadow: msg.reactions && msg.reactions[e] ? '0 1px 2px 0 #eef6fd' : 'none',
+              outline: 'none',
+            }}
+            className="ttt-emoji-btn"
+          >
+            {e}
+            {msg.reactions && msg.reactions[e] > 0 &&
+              <span style={{
+                marginLeft: 3,
+                fontSize: '0.95em',
+                color: '#27AE60',
+                fontWeight: 600,
+                verticalAlign: 'middle'
+              }}>{msg.reactions[e]}</span>
+            }
+          </button>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -160,8 +234,9 @@ function App() {
               <div className="ttt-chat-placeholder">Start chatting...</div>
             ) : (
               messages.map((msg, idx) => (
-                <div className="ttt-chat-message" key={idx}>
-                  {msg}
+                <div className="ttt-chat-message" key={idx} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  <span>{msg.text}</span>
+                  {renderReactions(msg, idx)}
                 </div>
               ))
             )}

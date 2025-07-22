@@ -218,6 +218,29 @@ body { background: var(--ttt-bg); }
   box-shadow: 0 1px 2.5px 0 rgba(44,62,80,.04);
 }
 
+/* --- Emoji Reactions --- */
+.ttt-emoji-btn {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 1.5px 7px;
+  border-radius: 6px;
+  font-size: 1.12em;
+  cursor: pointer;
+  min-width: 28px;
+  color: var(--ttt-primary);
+  transition: background 0.13s, box-shadow 0.13s;
+  margin-right: 1.5px;
+  line-height: 1;
+  box-shadow: none;
+}
+.ttt-emoji-btn:focus,
+.ttt-emoji-btn:hover {
+  background: var(--ttt-cell-hover);
+  box-shadow: 0 0 2.5px 0 #e2f2fd;
+  color: var(--ttt-accent);
+}
+
 .ttt-chat-placeholder {
   color: #b1b7c4;
   font-size: 1rem;
